@@ -38,6 +38,7 @@ int main() {
     int population = 1000000;
     int infected = 100;
     int publicSanity = 100; // well-being of city, the higher the number the happier. Reaching 0 means the citizens riot, germs win. scale: 0 - 100
+    const int SANITYDECREASER = 10; // This is the base amount the sanity decreases if the city makes a move that hurts individual wellbeing.
     int lockdownStreak = 0;
     bool lockdown = false;
     int cureProgress = 0; // // Once cureProgress reaches 100, city wins. Increased by 'develope a cure'
@@ -140,7 +141,7 @@ int main() {
             } else if (publicSanity > 0) {
                 cout << "the city is going insane! Can the medical team devise a solution before it is too late?" << endl;
             } else if (publicSanity == 0) {
-                cout << "the city has officially sunk into total madness, and the medical team is forced to flee the city due to violent threats from the public." << endl;
+                cout << "the city has officially sunk into total madness, and the medical team is forced to flee the city due to violent threats from the public. Germs are victorious!" << endl;
                 w = true; // germs won
                 break;
             }
@@ -154,7 +155,7 @@ int main() {
                 } else {
                     cout << "Lockdown will continue. It is now month " << lockdownStreak + 1 << " of lockdown." << endl;
                     lockdownStreak += 1;
-                    publicSanity -= 10 * lockdownStreak;
+                    publicSanity -= (SANITYDECREASER + 1) * lockdownStreak; // 11 * lockdown streak
                 }
             }
             
@@ -168,14 +169,14 @@ int main() {
             if (infected > 850000) {
                 cout << "\nThe medical team is choosing to treat infected citizens, temporarily keeping the city stable from an epidemic." << endl;
                 int newInfected = infected - (7 - stealth) * 1000;
-                publicSanity += 5;
+                publicSanity += 6;
                 cout << "\nInfected count has gone from " << infected << " to " << newInfected << "." << endl;
             } else if ((lockdown == false && infectionRate > 4 && infected > 250000) || (infectionRate > 3 && monthsPassed > 1)) { // priority 2: lockdown if infectionRate is dangerously high and threatens wipeout next turn (if lockdown is off); or enact lockdown if the germ is rapidly spamming an early mutation.
                 cout << "\nThe medical team has issued a citywide lockdown to slow the spread of the virus." << endl;
                 lockdown = true;
                 lockdownStreak += 1;
                 infectionRate -= 1;
-                publicSanity -= 10;
+                publicSanity -= SANITYDECREASER;
             } else if (cureProgress < 30 || cureProgress + (researchRate - stealth) >= 100) { // priority 3: if cureProgress is low or close to 100, increase it.
                 int newCureProgress = cureProgress + researchRate - stealth;
                 if (newCureProgress > 100) {
@@ -183,29 +184,29 @@ int main() {
                 }
                 cout << "\nThe medical team is choosing to continue developing a cure, increasing the city's Research from " << cureProgress << " to " << newCureProgress << "." << endl;
                 cureProgress = newCureProgress;
-                publicSanity -= 10;
+                publicSanity -= SANITYDECREASER;
             } else if (stealth > 4) { // priority: if stealth is above 4, decrease it.
                 cout << "\nThe medical team is now researching the germ further, decreasing its stealth from " << stealth << " to " << stealth - 1 << "." << endl;
                 stealth -= 1;
-                publicSanity -= 8;
+                publicSanity -= SANITYDECREASER / 2;
             } else if (cureProgress + (researchRate - stealth) * 2 >= 100) { // priority: if cureProgress is semi-close to 100, increase.
                 int newCureProgress = cureProgress + researchRate - stealth;
                 cout << "\nThe medical team is choosing to continue developing a cure, increasing the city's Research from " << cureProgress << " to " << newCureProgress << "." << endl;
                 cureProgress = newCureProgress;
-                publicSanity -= 10;
+                publicSanity -= SANITYDECREASER;
             } else if (stealth > 3) {
                 cout << "\nThe medical team is now researching the germ further, decreasing its stealth from " << stealth << " to " << stealth - 1 << "." << endl;
                 stealth -= 1;
-                publicSanity -= 8;
+                publicSanity -= SANITYDECREASER / 2;
             } else { // default priority: increase cureProgress.
                 int newCureProgress = cureProgress + researchRate - stealth;
                 cout << "\nThe medical team is choosing to continue developing a cure, increasing the city's Research from " << cureProgress << " to " << newCureProgress << "." << endl;
                 cureProgress = newCureProgress;
-                publicSanity -= 10;
+                publicSanity -= SANITYDECREASER;
             }
             
             
-            // Evaluating if any team has lost
+            // Evaluat1ing if any team has lost
             
             monthsPassed += 1; // time increment
             
